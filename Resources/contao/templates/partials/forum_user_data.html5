@@ -1,35 +1,59 @@
 <script src="bundles/con4gisforum/js/c4g.pn.js"></script>
 
+<?php
+
+$href = "";
+$style = "";
+
+if (strpos($_SERVER['REQUEST_URI'], 'readthread') !== false) {
+
+    if ($this->sUserName == null) {
+        $this->sUserName = "&nbsp;[&nbsp;&nbsp;-&nbsp;&nbsp;]&nbsp;";
+        $style = 'style="height: 80px;width: 80px;"';
+    } else {
+        $href = 'href="/userprofil.html?username=' . $this->sUserName . '"';
+    }
+
+    if ($this->sAvatarImage == null) {
+        $this->sAvatarImage = "files/themes/images/header/default_avatar.png";
+    }
+}
+
+?>
+
 <div class="c4g_forum_post_user_data">
-    <strong class="user_name"><?php echo $this->sUserName; ?><?php if ($this->bShowOnlineStatus): ?> <i class="online_status <?php if ($this->bIsOnline): ?>online<?php else: ?>offline<?php endif; ?> ui-button ui-widget ui-state-default"></i><?php endif; ?></strong>
-    <?php if ($this->sUserRank): ?><span class="user_rank"><?php echo $this->sUserRank; ?></span><?php endif; ?>
+    <strong class="user_name"><a <?php echo $href ?>><?php echo $this->sUserName; ?><?php if ($this->bShowOnlineStatus): ?></a><i class="online_status <?php if ($this->bIsOnline): ?>online<?php else: ?>offline<?php endif;?> ui-button ui-widget ui-state-default"></i><?php endif;?></strong>
+    <?php if ($this->sUserRank): ?><span class="user_rank"><?php echo $this->sUserRank; ?></span><?php endif;?>
     <?php if ($this->sAvatarImage): ?>
-        <img class="user_image" src="<?php echo $this->sAvatarImage; ?>" alt="<?php echo $this->sUserName; ?>">
-    <?php endif; ?>
+    <a <?php echo $href ?>>
+        <img class="user_image" src="<?php echo $this->sAvatarImage; ?>" alt="<?php echo $this->sUserName; ?>" <?php echo $style ?>>
+    </a>
+    <?php endif;?>
     <p class="user_data_statistics">
         <?php if ($this->iUserPostCount): ?>
           <?php if ($this->sForumType == 'DISCUSSIONS'): ?>
-            <?php echo $GLOBALS['TL_LANG']['C4G_FORUM']['DISCUSSION']['POST_COUNT']; ?>: <?php echo $this->iUserPostCount; ?>
-          <?php endif; ?>
+            <i class="far fa-file-alt" style="display: none;" data-end="<?php echo $this->iUserPostCount; ?>"></i>
+            <?php echo $GLOBALS['TL_LANG']['C4G_FORUM']['DISCUSSION']['POST_COUNT']; ?>:&nbsp;<?php echo $this->iUserPostCount; ?>
+          <?php endif;?>
           <?php if ($this->sForumType == 'QUESTIONS'): ?>
             <?php echo $GLOBALS['TL_LANG']['C4G_FORUM']['QUESTIONS']['POST_COUNT']; ?>: <?php echo $this->iUserPostCount; ?>
-          <?php endif; ?>
-        <?php endif; ?>
+          <?php endif;?>
+        <?php endif;?>
     </p>
 
-    <?php if($this->c4g_forum_show_pn_button): ?>
+    <?php if ($this->c4g_forum_show_pn_button): ?>
         <p class="user_data_pn">
-            <a href="#" onclick="C4gPn.sendMessageTo('<?php echo $this->iUserId;?>','','<?php echo $GLOBALS['TL_LANG']['tl_c4g_pn']['profile_compose_title']." ".$this->sUserName; ?>');return false;"><?php echo $this->pn_label;?></a>
+            <a href="/Nachrichten.html?username=<?=$this->sUserName; ?>"><?php echo $this->pn_label; ?></a>
         </p>
-    <?php endif; ?>
+    <?php endif;?>
 
     <?php if (!empty($this->aMemberLinks)): ?>
     <ul class="user_social_links">
         <?php foreach ($this->aMemberLinks as $sLinkType => $sMemberLink): ?>
             <li class="<?php echo $sLinkType; ?>"><a href="<?php echo $sMemberLink; ?>" target="_blank"><?php echo $GLOBALS['TL_LANG']['C4G_FORUM']['DISCUSSION'][$sLinkType]; ?></a></li>
-        <?php endforeach; ?>
+        <?php endforeach;?>
     </ul>
-    <?php endif; ?>
+    <?php endif;?>
 </div>
 
 <?php echo $this->c4g_pn_js; ?>

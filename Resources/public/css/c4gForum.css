@@ -16,6 +16,8 @@
 
 .mod_c4g_forum .ui-widget,.c4gGuiDialogWrapper.ui-widget,.dataTables_wrapper {
 	font-size: 12px;
+	/* font-size: 1.2rem !important; */
+
 }
 
 .mod_c4g_forum .ui-button {
@@ -34,11 +36,12 @@
     box-sizing: border-box;
 	margin-right: 10px;
 	margin-bottom: 10px;
-	width: 170px;
-	height: 170px;
+	width: 214px;
+	height: 214px;
 	float: left;
 	cursor: pointer;
 	position: relative;
+	font-size: 1.2rem !important;
 }
 
 .c4gForumBoxWithoutImage.c4gForumBoxNoJqui {
@@ -60,7 +63,7 @@
 
 .c4gForumBoxSubtext {
 	position: absolute;
-	margin-top: 50px;
+	margin-top: 4.5rem;
 	margin-left: -50%;
 	left: 50%;
 	width: 100%;
@@ -81,7 +84,7 @@
 .c4gForumBoxLastPost {
 	float: bottom;
 	text-align: center;
-	font-size: 70%;
+	font-size: 62%;
 	position: absolute;
 	bottom: 0px;
 	margin: 10px;
@@ -122,10 +125,15 @@
 	width: 100%;
 }
 
+.c4gForumPost{
+	border: 1px solid rgba(0,0,0,.125);
+    border-radius: .25rem;
+}
+
 .c4gForumPostBody {
-	padding-bottom: 10px;
-	padding-left: 10px;
-	padding-right: 10px;
+	
+	padding-left: 2%;
+	padding-right: 2%;
 }
 
 .c4gForumPostBody:after {
@@ -134,9 +142,14 @@
 	display: table;
 }
 
-.c4gForumPostHeader, .c4gForumPostText, .c4g_forum_post_user_data {
+ .c4gForumPostText, .c4g_forum_post_user_data {
 	padding-top: 10px;
 	padding-bottom: 10px;
+}
+.c4gForumPostHeader{
+	padding: 2%;
+	border-bottom: 1px solid rgba(0,0,0,.125);
+	background-color: #f3f3f3;
 }
 
 .c4gForumPostHeader.ui-widget, .c4gForumPostText.ui-widget {
@@ -158,7 +171,7 @@
 }
 
 .c4gForumPostText img {
-	width: auto;
+	/** width: auto; */
 }
 
 /* User information in forum post */
@@ -178,6 +191,7 @@
 .c4g_forum_post_user_data .user_image {
 	height: auto;
 	max-width: 100%;
+	border-radius: 50%;  /*sensqiue*/
 }
 
 .c4g_forum_post_user_data .online_status {
@@ -250,7 +264,7 @@
 }
 
 .c4gGuiDialogContent {
-	margin-top: 10px;
+	/* margin-top: 10px; */
 	margin-bottom: 10px;
 
 }
@@ -278,7 +292,7 @@
 
 .c4g_pagination a{
     min-width: 16px;
-    height: 16px;
+    height: 30px;
     padding: 5px;
     text-decoration: none;
     margin-right: 2px;
@@ -436,4 +450,16 @@ label.search-label{
 .search-results div{
 	margin-top:4px;
 	margin-bottom:4px;
+}
+
+/* Sensique  Extension */
+.c4g_forum_post_head_edit_row{
+	border: solid 1px #dfdfdf;
+	border-bottom-left-radius: 0.25rem;
+	border-bottom-right-radius: 0.25rem;
+    top: -0.25rem;
+    position: relative;
+	font-style: italic;
+	background-color: #f3f3f3;
+
 }

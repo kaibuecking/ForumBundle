@@ -38,7 +38,8 @@
     $GLOBALS['TL_LANG']['C4G_FORUM']['DISCUSSION']['POST']                    = 'Beitrag';
     $GLOBALS['TL_LANG']['C4G_FORUM']['DISCUSSION']['POSTS']                   = 'Beiträge';
     $GLOBALS['TL_LANG']['C4G_FORUM']['DISCUSSION']['LAST_POST']               = 'Letzter Beitrag';
-    $GLOBALS['TL_LANG']['C4G_FORUM']['DISCUSSION']['NEW_POST']                = 'Antworten';
+//    $GLOBALS['TL_LANG']['C4G_FORUM']['DISCUSSION']['NEW_POST']                = 'Antworten';
+    $GLOBALS['TL_LANG']['C4G_FORUM']['DISCUSSION']['NEW_POST']                = 'Kommentieren';
     $GLOBALS['TL_LANG']['C4G_FORUM']['DISCUSSION']['NEW_POST_PREVIEW']        = 'Vorschau - Antwort';
     $GLOBALS['TL_LANG']['C4G_FORUM']['QUESTIONS']['POST']                     = 'Kommentar';
     $GLOBALS['TL_LANG']['C4G_FORUM']['QUESTIONS']['POSTS']                    = 'Kommentare';
@@ -54,8 +55,8 @@
     $GLOBALS['TL_LANG']['C4G_FORUM']['DISCUSSION']['SINGLE_POST']             = 'Einzeln';
     $GLOBALS['TL_LANG']['C4G_FORUM']['DISCUSSION']['SUBJECT']                 = 'Betreff';
     $GLOBALS['TL_LANG']['C4G_FORUM']['DISCUSSION']['THREADDESC']              = 'Beschreibung';
-    $GLOBALS['TL_LANG']['C4G_FORUM']['DISCUSSION']['EDIT_THREAD']             = 'Thema bearbeiten';
-    $GLOBALS['TL_LANG']['C4G_FORUM']['DISCUSSION']['SAVE_THREAD_CHANGES']     = 'Geändertes Thema speichern';
+    $GLOBALS['TL_LANG']['C4G_FORUM']['DISCUSSION']['EDIT_THREAD']             = 'Thementitel bearbeiten'; //sensique
+    $GLOBALS['TL_LANG']['C4G_FORUM']['DISCUSSION']['SAVE_THREAD_CHANGES']     = 'Speichern'; //sensique
     $GLOBALS['TL_LANG']['C4G_FORUM']['DISCUSSION']['DEL_THREAD']              = 'Thema löschen';
     $GLOBALS['TL_LANG']['C4G_FORUM']['DISCUSSION']['MOVE_THREAD']             = 'Thema verschieben';
     $GLOBALS['TL_LANG']['C4G_FORUM']['DISCUSSION']['SUBSCRIBE_THREAD']        = 'Thema abonnieren';
@@ -140,18 +141,18 @@
     $GLOBALS['TL_LANG']['C4G_FORUM']['TICKET']['THREADS_NOTFOUND']   = 'Keine Tickets mit diesem Suchbegriff gefunden';
 
 
-    $GLOBALS['TL_LANG']['C4G_FORUM']['DISCUSSION']['POST_HEADER_COUNT']          = ' Beitrag <b %s>#%d</b> von <b %s>%d</b> ';
+    $GLOBALS['TL_LANG']['C4G_FORUM']['DISCUSSION']['POST_HEADER_COUNT']          = ' Kommentar&nbsp;<b %s>#%d</b>&nbsp;von&nbsp;<b %s>%d</b> ';  //Beitrag
     $GLOBALS['TL_LANG']['C4G_FORUM']['QUESTIONS']['POST_HEADER_COUNT']           = ' Kommentar <b %s>#%d</b> von <b %s>%d</b> ';
     $GLOBALS['TL_LANG']['C4G_FORUM']['TICKET']['POST_HEADER_COUNT']              = ' Nachricht <b %s>#%d</b> von <b %s>%d</b> ';
     $GLOBALS['TL_LANG']['C4G_FORUM']['DISCUSSION']['COMMENT_HEADER_COUNT']       = ' Kommentar <b %s>#%d</b> von <b %s>%d</b> ';
-    $GLOBALS['TL_LANG']['C4G_FORUM']['DISCUSSION']['POST_HEADER_CREATED']        = 'Erstellt von <b %s>%s</b> am <b %s>%s</b>';
+    $GLOBALS['TL_LANG']['C4G_FORUM']['DISCUSSION']['POST_HEADER_CREATED']        = 'Erstellt&nbsp;von&nbsp;<b %s>%s</b>&nbsp;am&nbsp;<b %s>%s</b>';
     $GLOBALS['TL_LANG']['C4G_FORUM']['DISCUSSION']['POST_HEADER_CREATED_AUTHOR'] = 'Erstellt von <b %s>%s</b>';
     $GLOBALS['TL_LANG']['C4G_FORUM']['DISCUSSION']['POST_HEADER_CREATED_DATE']   = 'Erstellt am <b %s>%s</b>';
     $GLOBALS['TL_LANG']['C4G_FORUM']['DISCUSSION']['POST_HEADER_SUBJECT']        = '<b %s>Betreff:</b> <span %s>%s</span>';
     $GLOBALS['TL_LANG']['C4G_FORUM']['DISCUSSION']['POST_HEADER_LINK']           = 'Link: <a href="%s">%s</a>';
     $GLOBALS['TL_LANG']['C4G_FORUM']['DISCUSSION']['POST_HEADER_TAGS']           = 'Tags: %s';
     $GLOBALS['TL_LANG']['C4G_FORUM']['DISCUSSION']['POST_HEADER_LINK_NEWWINDOW'] = 'Link: <a href="%s" target="_blank">%s</a>';
-    $GLOBALS['TL_LANG']['C4G_FORUM']['DISCUSSION']['POST_EDIT_INFO']             = '<b %s>%s</b> Mal geändert, zuletzt am <b %s>%s</b> von <b %s>%s</b>';
+    $GLOBALS['TL_LANG']['C4G_FORUM']['DISCUSSION']['POST_EDIT_INFO']             = '<b %s>%s</b>&nbsp;Mal&nbsp;geändert,&nbsp;zuletzt&nbsp;am&nbsp;<b %s>%s</b>&nbsp;von&nbsp;<b %s>%s</b>';
     $GLOBALS['TL_LANG']['C4G_FORUM']['DISCUSSION']['POST_EDIT_INFO_AUTHOR']      = '<b %s>%s</b> Mal geändert, zuletzt von <b %s>%s</b>';
     $GLOBALS['TL_LANG']['C4G_FORUM']['DISCUSSION']['POST_EDIT_INFO_DATE']        = '<b %s>%s</b> Mal geändert, zuletzt am <b %s>%s</b>';
     //$GLOBALS['TL_LANG']['C4G_FORUM']['DISCUSSION']['POST_COUNT']                 = 'Beiträge';
@@ -366,8 +367,8 @@
     $GLOBALS['TL_LANG']['C4G_FORUM']['DISCUSSION']['DEL_POST_WARNING'] = 'Möchten Sie den gewählten Beitrag wirklich unwiderruflich löschen?<br/>' .
                                                            'Forenbereich: <b>%s</b><br/>' .
                                                            'Thema: <b>%s</b><br/>' .
-                                                           'Beitrag von: <b>%s</b><br/>' .
-                                                           'Betreff: <b>%s</b><br/>';
+                                                           'Beitrag von: <b>%s</b><br/>' ;
+                                                          // 'Betreff: <b>%s</b><br/>';
     $GLOBALS['TL_LANG']['C4G_FORUM']['DISCUSSION']['DEL_POST_ERROR']   = 'Fehler beim Löschen des Beitrags!';
     $GLOBALS['TL_LANG']['C4G_FORUM']['DISCUSSION']['DEL_POST_SUCCESS'] = 'Beitrag erfolgreich gelöscht.';
 

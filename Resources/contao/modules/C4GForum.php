@@ -29,6 +29,7 @@ namespace con4gis\ForumBundle\Resources\contao\modules;
 
     $GLOBALS['c4gForumErrors']           = array();
     $GLOBALS['c4gForumSearchParamCache'] = array();
+    $GLOBALS['first_post'] = true;
 
     /**
      * to catch warnings etc. and put them into the ajax response separately
@@ -53,6 +54,62 @@ namespace con4gis\ForumBundle\Resources\contao\modules;
      */
     class C4GForum extends \Module
     {
+
+        const DROPZONE = '<link rel="stylesheet" type="text/css" href="files/forum/css/dropzone.min.css">' .
+                        '<!-- js -->' .
+                        '<script src="/files/js/dropzone.min.js" type="text/javascript"></script>' . 
+                        
+                        '<div class="pb-3">
+                            <form action="/bundles/con4giscore/vendor/imgUpload.php?CKEditor=ckeditor&CKEditorFuncNum=1&langCode=de" method="post" class="dropzone clickable" id="upload-dropzone" enctype="image/*">
+                            </form>
+                        </div>
+
+                        <script> 
+                            Dropzone.autoDiscover = false;
+
+                            var myDropzone = $("#upload-dropzone").dropzone({
+                                paramName: "upload",
+                                maxFilesize: 2, // MB
+                                addRemoveLinks: true,
+                                acceptedFiles: ".jpeg,.jpg,.png",
+                                dictDefaultMessage: "Lade Bilder per Drag and Drop hoch oder klicke hier.",
+                                dictFallbackMessage: "Ihr Browser unterstützt Drag&Drop Dateiuploads nicht",
+                                dictFallbackText: "Benutzen Sie das Formular um Ihre Dateien hochzuladen",
+                                dictFileTooBig: "Die Datei ist zu groß. Die maximale Dateigröße beträgt 2MB",
+                                dictInvalidFileType: "Eine Datei dieses Typs kann nicht hochgeladen werden",
+                                dictResponseError: "Der Server hat ihre Anfrage mit Status {{statusCode}} abgelehnt",
+                                dictCancelUpload: "Hochladen abbrechen",
+                                dictCancelUploadConfirmation: null,
+                                dictRemoveFile: "Datei entfernen",
+                                dictMaxFilesExceeded: "Sie können keine weiteren Dateien mehr hochladen",
+                                init: function() {
+                                    var that = this;
+                                    this.on("thumbnail", function (file) {
+                                        if (file.height > 1080 || file.width > 1920) {
+                                           alert("Bild darf nicht größer als 1920 x 1080 Pixel sein!");
+                                           that.removeFile(file);
+                                        }
+                                    });
+                                    this.on("success", function(file, response) { 
+                                        addImageToEditor(response, file.upload.uuid); 
+                                    });
+                                    this.on("removedfile", function(file) {
+                                        removeImageFromEditor(file.upload.uuid);
+                                    });
+                                }
+                            });
+
+                            CKEDITOR.on( "instanceReady", function( evt ) {
+                                // initChangeEvent();
+                                $("#cke_ckeditor").find(".cke_contents").css("height", "450px");
+                                $(".cke_button__image").hide();
+                                CKEDITOR.instances.ckeditor.insertHtml(
+                                    "<p></p>"
+                                  );
+                            } );
+
+                        </script>'
+                        ;
 
         /**
          * Template
@@ -1168,8 +1225,11 @@ namespace con4gis\ForumBundle\Resources\contao\modules;
                 }
             }
 
-            if (!$preview) {
-                $data .= '<span class="c4g_forum_post_head_postcount_row">' . sprintf(C4GForumHelper::getTypeText($this->c4g_forum_type,'POST_HEADER_COUNT'), 'class=c4g_forum_post_head_postcount_number', $post['post_number'], 'class=c4g_forum_post_head_postcount_count', $post['posts']) . '</span>';
+            if (!$preview && !$GLOBALS['first_post']) { 
+                $data .= '<span class="c4g_forum_post_head_postcount_row">' . sprintf(C4GForumHelper::getTypeText($this->c4g_forum_type,'POST_HEADER_COUNT'), 'class=c4g_forum_post_head_postcount_number', $post['post_number'] - 1, 'class=c4g_forum_post_head_postcount_count', $post['posts'] - 1 ) . '<br></span>';               
+            }
+            else{
+                $GLOBALS['first_post'] = false;
             }
 
             if ((!$preview) && (!$singlePost)) {
@@ -1177,8 +1237,13 @@ namespace con4gis\ForumBundle\Resources\contao\modules;
                 // change buttons for post
                 // change buttons for post
                 $act = $this->getChangeActionsForPost($post);
-                foreach ($act as $key => $value) {
-                    $data .= '<a href="#" data-action="' . $key . '" class="c4gForumPostHeaderChangeButton c4gGuiAction' . $linkClass . $triggerTargetClass . '">' . $value . '</a>';
+                foreach ($act as $key => $value) {                    
+                    if($post['post_number'] == 1 && $value == "Löschen"){
+                        //don't show first post delete button
+                    }
+                    else{
+                        $data .= '<button class="btn btn-primary btn-sm mr-1 c4gForumPostHeaderChangeButton" ><a href="#" data-action="' . $key . '" style="color:white; text-decoration-line: initial" class="c4gForumPostHeaderChangeButton c4gGuiAction' . $linkClass . $triggerTargetClass . '">' . $value . '</a></button>';    
+                    }                    
                 }
             }
             $act = $this->getViewActionsForPost($post);
@@ -1217,22 +1282,22 @@ namespace con4gis\ForumBundle\Resources\contao\modules;
                 // show author only when not in plainhtml-mode (=pages that will be indexed by search engines)
 
                 if (($this->c4g_forum_remove_createperson != '1') && ($this->c4g_forum_remove_createdate != '1')) {
-                    $data .= '<br><span class="c4g_forum_post_head_origin_row">' .
+                    $data .= '<span class="c4g_forum_post_head_origin_row">' .
                         sprintf($GLOBALS['TL_LANG']['C4G_FORUM']['DISCUSSION']['POST_HEADER_CREATED'], 'class=c4g_forum_post_head_origin_author',
                             $post['username'], 'class=c4g_forum_post_head_origin_datetime', $this->helper->getDateTimeString($post['creation'])) . '</span>';
                 } else if ($this->c4g_forum_remove_createperson != '1') {
-                    $data .= '<br><span class="c4g_forum_post_head_origin_row">' .
+                    $data .= '<span class="c4g_forum_post_head_origin_row">' .
                         sprintf($GLOBALS['TL_LANG']['C4G_FORUM']['DISCUSSION']['POST_HEADER_CREATED_AUTHOR'], 'class=c4g_forum_post_head_origin_author',
                             $post['username']) . '</span>';
                 } else if ($this->c4g_forum_remove_createdate != '1') {
-                    $data .= '<br><span class="c4g_forum_post_head_origin_row">' .
+                    $data .= '<span class="c4g_forum_post_head_origin_row">' .
                         sprintf($GLOBALS['TL_LANG']['C4G_FORUM']['DISCUSSION']['POST_HEADER_CREATED_DATE'],
                             'class=c4g_forum_post_head_origin_datetime', $this->helper->getDateTimeString($post['creation'])) . '</span>';
                 }
             }
-            $data .= '<br>' .
+            /* $data .= '<br>' .
                      sprintf($GLOBALS['TL_LANG']['C4G_FORUM']['DISCUSSION']['POST_HEADER_SUBJECT'], 'class="c4g_forum_post_head_subject_pre"',
-                             'class="c4g_forum_post_head_subject"', $post['subject']) . '<br>';
+                             'class="c4g_forum_post_head_subject"', $post['subject']) . '<br>'; */
 
             if (($post['linkname'] != '') || ($post['linkurl'] != '')) {
                 $linkname = $post['linkname'];
@@ -1383,12 +1448,16 @@ namespace con4gis\ForumBundle\Resources\contao\modules;
                 '</div>' .
                 '';
 
+            if (!$this->c4g_forum_posts_jqui) {
+                $data .= '';
+            }
+
             $data .= '</div>';
 
             if ($post['edit_count']) {
                 if (($this->c4g_forum_remove_lastperson != '1') && ($this->c4g_forum_remove_lastdate != '1')) {
                     $data .=
-                        '<div class="c4gForumPostText c4g_forum_post_head_edit_row' . $targetClass . '">' .
+                        '<div class="c4gForumPostText c4g_forum_post_head_edit_row p-2' . $targetClass . '">' .
                         sprintf($GLOBALS['TL_LANG']['C4G_FORUM']['DISCUSSION']['POST_EDIT_INFO'], 'class="c4g_forum_post_head_edit_count"',
                             $post['edit_count'], 'class="c4g_forum_post_head_edit_datetime"', $this->helper->getDateTimeString($post['edit_last_time']),
                             'class="c4g_forum_post_head_edit_author"', $post['edit_username']) .
@@ -1396,7 +1465,7 @@ namespace con4gis\ForumBundle\Resources\contao\modules;
 
                 } else if ($this->c4g_forum_remove_lastperson != '1') {
                     $data .=
-                        '<div class="c4gForumPostText c4g_forum_post_head_edit_row' . $targetClass . '">' .
+                        '<div class="c4gForumPostText c4g_forum_post_head_edit_row p-2' . $targetClass . '">' .
                         sprintf($GLOBALS['TL_LANG']['C4G_FORUM']['DISCUSSION']['POST_EDIT_INFO_AUTHOR'], 'class="c4g_forum_post_head_edit_count"',
                             $post['edit_count'],
                             'class="c4g_forum_post_head_edit_author"', $post['edit_username']) .
@@ -1404,7 +1473,7 @@ namespace con4gis\ForumBundle\Resources\contao\modules;
 
                 } else if ($this->c4g_forum_remove_lastdate != '1') {
                     $data .=
-                        '<div class="c4gForumPostText c4g_forum_post_head_edit_row' . $targetClass . '">' .
+                        '<div class="c4gForumPostText c4g_forum_post_head_edit_row p-2' . $targetClass . '">' .
                         sprintf($GLOBALS['TL_LANG']['C4G_FORUM']['DISCUSSION']['POST_EDIT_INFO_DATE'], 'class="c4g_forum_post_head_edit_count"',
                             $post['edit_count'], 'class="c4g_forum_post_head_edit_datetime"', $this->helper->getDateTimeString($post['edit_last_time'])) .
                         '</div>';
@@ -1415,12 +1484,11 @@ namespace con4gis\ForumBundle\Resources\contao\modules;
 
 
 
-            if (!$this->c4g_forum_posts_jqui) {
-                $data .= '<hr>';
-            }
+          if (!$this->c4g_forum_posts_jqui) {
+              $data .= '<br>';
+          } 
 
-//            $data .=
-//                '</div>';
+//            $data .= '</div>';
 
 
             return $data;
@@ -1713,47 +1781,60 @@ namespace con4gis\ForumBundle\Resources\contao\modules;
 
                 $sPagination = <<<JSPAGINATE
 
-                <div class="c4g_pagination bottompagination"></div>
+                <style>
+                    .page-link{
+                        color: black;
+                    }
+                </style>
+
+                <nav aria-label="Page navigation article"><ul class="pagination"></ul></nav>
                 <script>
                     jQuery(document).ready(function(){
                         var prev = {start: 0, stop: 0},
                             cont = jQuery('.c4gForumPost');
 
-                        var Paging = jQuery(".c4g_pagination").paging(cont.length, {
+                        var Paging = jQuery(".pagination").paging(cont.length, {
                             format: '{$sPaginatorFormat}',
                             perpage: $iPerPage,
                             lapping: 0,
                             page: null, // we await hashchange() event
                             onSelect: function (page) {
 
-                                var data = this.slice;
+                                if(true || page === window.location.hash.substr(1)) {
 
-                                cont.slice(prev[0], prev[1]).css('display', 'none');
-                                if (jQuery(cont.slice(prev[0], prev[1]).next()).hasClass('c4g_forum_post_head_edit_row')) {
-                                    jQuery(cont.slice(prev[0], prev[1]).next()).css('display', 'none');
+                                    var data = this.slice;
+
+                                    cont.slice(prev[0], prev[1]).css('display', 'none');
+                                    if (jQuery(cont.slice(prev[0], prev[1]).next()).hasClass('c4g_forum_post_head_edit_row')) {
+                                        jQuery(cont.slice(prev[0], prev[1]).next()).css('display', 'none');
+                                    }
+                                    cont.slice(data[0], data[1]).fadeIn("slow");
+                                    if (jQuery(cont.slice(data[0], data[1]).next()).hasClass('c4g_forum_post_head_edit_row')) {
+                                        jQuery(cont.slice(data[0], data[1]).next()).fadeIn("slow");
+                                    }
+                                    prev = data;
                                 }
-                                cont.slice(data[0], data[1]).fadeIn("slow");
-                                if (jQuery(cont.slice(data[0], data[1]).next()).hasClass('c4g_forum_post_head_edit_row')) {
-                                    jQuery(cont.slice(data[0], data[1]).next()).fadeIn("slow");
-                                }
-                                prev = data;
+
+                                showBreak();
 
                                 return true; // locate!
                             },
                             onFormat: function (type) {
                                 var sUrl = 'http://' + window.location.host + window.location.pathname + window.location.search;
+                                /** prev: href="'+sUrl+'#'+this.value+'" */
                                 switch (type) {
                                 case 'block': // n and c
                                     var isActiveClass = (this.page == this.value)?"ui-state-highlight ":"";
-                                    return '<a href="'+sUrl+'#'+this.value+'" class="'+isActiveClass+' ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">' + this.value + '</a>';
+                                    var isActiveClassBS = (this.page == this.value)?"active ":"";
+                                    return '<li class="page-item '+isActiveClassBS+'"><a href="javascript:void(0)" class="'+isActiveClass+' page-link">' + this.value + '</a></li>';
                                 case 'next': // >
-                                    return '<a href="'+sUrl+'#'+this.value+'" class=" ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">&gt;</a>';
+                                    return '<li class="page-item"><a href="javascript:void(0)" class="page-link" >&gt;</a></li>';
                                 case 'prev': // <
-                                    return '<a href="'+sUrl+'#'+this.value+'" class=" ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">&lt;</a>';
+                                    return '<li class="page-item"><a href="javascript:void(0)" class="page-link" >&lt;</a></li>';
                                 case 'first': // [
-                                    return '<a href="'+sUrl+'#'+this.value+'" class=" ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">$sFirst</a>';
+                                    return '<li class="page-item"><a href="javascript:void(0)" class="page-link" >$sFirst</a></li>';
                                 case 'last': // ]
-                                    return '<a href="'+sUrl+'#'+this.value+'" class=" ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">$sLast</a>';
+                                    return '<li class="page-item"><a href="javascript:void(0)" class="page-link" >$sLast</a></li>';
                                 }
                             }
                         });
@@ -1771,6 +1852,25 @@ namespace con4gis\ForumBundle\Resources\contao\modules;
                         jQuery(window).hashchange();
 
                     });
+                    
+                    function showBreak(){
+                        $('.c4gForumPostNoJqui').each((i, el) => {
+                            if($(el).next().is('br') && $(el).css('display') != 'none') {
+                                $(el).next().show();
+                            }
+                        });
+
+                        $('.c4gGuiDialogContent').find('br').each((i, el) => {
+                            if($(el).next().css('display') != 'none' && $(el).prev().css('display') != 'none') {
+                                $(el).show();
+                            } else {
+                                $(el).hide();
+                            }
+                        });
+
+                        $('.c4gGuiDialogContent').find('br').last().show();
+                    }
+
                 </script>
 JSPAGINATE;
                 $data .= html_entity_decode($sPagination);
@@ -1839,12 +1939,15 @@ JSPAGINATE;
             }
 
             if (!$inputThreadname) {
-               $inputThreadname .= C4GForumHelper::getTypeText($this->c4g_forum_type,'THREAD') . ':<br/>' .
-                   '<input name="thread" type="text" class="formdata ui-corner-all" size="80" maxlength="255" /><br />';
+               //$inputThreadname .= C4GForumHelper::getTypeText($this->c4g_forum_type,'THREAD') . ':<br/>' ;
+               $inputThreadname .= '<input name="thread" placeholder="'.C4GForumHelper::getTypeText($this->c4g_forum_type,'THREAD').'" type="text" class="formdata ui-corner-all" size="80" maxlength="255" /><br />';
             }
 
-            $data = '<div class="c4gForumNewThread">' .
-                    '<div class="c4gForumNewThreadName">' .
+            $data = '<br/><p>Unser Ziel ist eine respektvolle und freundliche Kommunikation der Mitglieder von SensIQue, deshalb haben wir bestimmte Verhaltensregeln. Diese finden Sie <a href="{{link_url::verhaltensregeln}}">hier</a>.
+            Wir wünschen Ihnen viel Spaß mit SensIQue!
+            </p>
+                    <div class="c4gForumNewThread">' .
+                    '<div class="c4gForumNewThreadName mb-3">' .
 
                     $inputThreadname .
                     '</div>';
@@ -1938,9 +2041,12 @@ JSPAGINATE;
 
             }
 
+            // Drag and Drop Bild Upload New Post 
+            $data .= self::DROPZONE;
+
             $data .= $this->getTagForm('c4gForumNewThreadPostTags', $aPost, 'newthread');
             $data .= '<div class="c4gForumNewThreadContent">' .
-                     C4GForumHelper::getTypeText($this->c4g_forum_type,'POST') . ':<br/>' .
+                     //C4GForumHelper::getTypeText($this->c4g_forum_type,'POST') . ':<br/>' .
                      '<input type="hidden" name="uploadEnv" value="' . $sSite . '">' .
                      '<input type="hidden" name="uploadPath" value="' . $imageUploadPath->path . '">' .
                      '<input type="hidden" name="site" class="formdata" value="' . $sCurrentSite . '">' .
@@ -2053,10 +2159,13 @@ JSPAGINATE;
             }
 
             $data .= '<div class="c4gForumNewPost">' .
-                     '<div class="c4gForumNewPostSubject">' .
-                     $GLOBALS['TL_LANG']['C4G_FORUM']['DISCUSSION']['SUBJECT'] . ':<br/>' .
-                     '<input name="subject" value="' . $threadname . '" type="text" class="formdata ui-corner-all" size="80" maxlength="255" /><br />' .
+                     '<div class="c4gForumNewPostSubject">' . 
+                     // $GLOBALS['TL_LANG']['C4G_FORUM']['DISCUSSION']['SUBJECT'] . ':<br/>' .
+                     '<input name="subject" value="' . $threadname . '" type="hidden" class="formdata ui-corner-all form-control" size="80" maxlength="255" /><br />' .
                      '</div>';
+            $data .='<p>Unser Ziel ist eine respektvolle und freundliche Kommunikation der Mitglieder von SensIQue, deshalb haben wir bestimmte Verhaltensregeln. Diese finden Sie <a href="{{link_url::verhaltensregeln}}">hier</a>.
+                     Wir wünschen Ihnen viel Spaß mit SensIQue!
+                     </p>';                
             $data .= $this->getTagForm('c4gForumNewPostPostTags', $aPost, 'newpost');
 
             if ($this->c4g_forum_rating_enabled) {
@@ -2084,8 +2193,11 @@ JSPAGINATE;
                 $imageUploadPath = \FilesModel::findByUuid(\Contao\StringUtil::binToUuid($binImageUuid[0]));
             }
 
+            // Drag and Drop Bild Upload New Post 
+            $data .= self::DROPZONE;
+
             $data .= '<div class="c4gForumNewPostContent">' .
-                      C4GForumHelper::getTypeText($this->c4g_forum_type,'POST') . ':<br/>' .
+                     // C4GForumHelper::getTypeText($this->c4g_forum_type,'POST') . ':<br/>' .
                      '<input type="hidden" name="uploadEnv" value="' . $sSite . '">' .
                      '<input type="hidden" name="site" class="formdata" value="' . $sCurrentSite . '">' .
                      '<input type="hidden" name="hsite" class="formdata" value="' . $sCurrentSiteHashed . '">' .
@@ -2710,8 +2822,8 @@ JSPAGINATE;
 
                     if (($forum['posts'] > 0) && ($this->c4g_forum_boxes_lastpost)) {
                         $lastname = $this->helper->checkThreadname($forum['last_threadname']);
-                        if (strlen($lastname) > 100) {
-                            $lastname = substr($lastname, 0, 97) . '...';
+                        if (strlen($lastname) > 50) {
+                            $lastname = substr($lastname, 0, 47) . '...';
                         }
                         $data .=
                             '<div class="c4gForumBoxLastPost">' .
@@ -2931,7 +3043,7 @@ JSPAGINATE;
                 $dialogData = sprintf(C4GForumHelper::getTypeText($this->c4g_forum_type,'SUBSCRIPTION_SUBFORUM_TEXT'), $this->helper->getForumNameFromDB($forumId,$this->c4g_forum_language_temp));
                 $buttonTxt  = C4GForumHelper::getTypeText($this->c4g_forum_type,'SUBSCRIBE_SUBFORUM');
 
-                $dialogData .= '<div>' . '<input id="c4gForumSubscriptionForumOnlyThreads"  type="checkbox" name="subscription_only_threads" class="formdata" />' . '<label for="c4gForumSubscriptionForumOnlyThreads">' .
+                $dialogData .= '<div>' . '<input id="c4gForumSubscriptionForumOnlyThreads"  type="checkbox" name="subscription_only_threads" class="formdata" />' . '<label class="pl-2" for="c4gForumSubscriptionForumOnlyThreads">' .
                     C4GForumHelper::getTypeText($this->c4g_forum_type,'SUBSCRIPTION_SUBFORUM_ONLY_THREADS') . '</label>' . '</div>';
                 $title = C4GForumHelper::getTypeText($this->c4g_forum_type,'SUBSCRIBE_SUBFORUM');
             }
@@ -4049,9 +4161,12 @@ JSPAGINATE;
 
             $data .= '<div class="c4gForumEditPost">' .
                      '<div class="c4gForumEditPostSubject">' .
-                     $GLOBALS['TL_LANG']['C4G_FORUM']['DISCUSSION']['SUBJECT'] . ':<br/>' .
-                     '<input name="subject" value="' . $post['subject'] . '" type="text" class="formdata ui-corner-all" size="80" maxlength="100" /><br />' .
+                     //$GLOBALS['TL_LANG']['C4G_FORUM']['DISCUSSION']['SUBJECT'] . ':<br/>' .
+                     '<input name="subject" type="hidden" value="' . $post['subject'] . '" type="text" class="formdata ui-corner-all form-control" size="80" maxlength="100" /><br />' .
                      '</div>';
+            $data .='<p>Unser Ziel ist eine respektvolle und freundliche Kommunikation der Mitglieder von SensIQue, deshalb haben wir bestimmte Verhaltensregeln. Diese finden Sie <a href="{{link_url::verhaltensregeln}}">hier</a>.
+                    Wir wünschen Ihnen viel Spaß mit SensIQue!
+                    </p>';         
             $data .= $this->getTagForm('c4gForumEditPostTags', $post, $dialogId);
 
             if (($post['authorid'] != $this->User->id) && $this->c4g_forum_rating_enabled) {
@@ -4082,9 +4197,12 @@ JSPAGINATE;
                 $imageUploadPath = \FilesModel::findByUuid(\Contao\StringUtil::binToUuid($binImageUuid[0]));
             }
 
+            // Drag and Drop Bild Upload Edit Post
+            $data .= self::DROPZONE;
+
 
             $data .= '<div class="c4gForumEditPostContent">' .
-                     C4GForumHelper::getTypeText($this->c4g_forum_type,'POST') . ':<br/>' .
+                     //C4GForumHelper::getTypeText($this->c4g_forum_type,'POST') . ':<br/>' .
                      '<input type="hidden" name="uploadEnv" value="' . $sSite . '">' .
                      '<input type="hidden" name="uploadPath" value="' . $imageUploadPath->path . '">' .
                      '<input type="hidden" name="site" class="formdata" value="' . $sCurrentSite . '">' .

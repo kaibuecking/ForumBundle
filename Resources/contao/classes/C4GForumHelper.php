@@ -1818,17 +1818,19 @@ class C4GForumHelper extends \System
 
         return $result->name;
 	}
+	//changed for Sensique
 	public function getTicketTitle($ticketId,$forumtype, $time = null){
 	    $thread = $this->Database->prepare('SELECT * FROM tl_c4g_forum_thread WHERE id=?')->execute($ticketId)->fetchAssoc();
-        $title = '['.C4GForumHelper::getTypeText($forumtype,'THREAD') . ' #';
-        $title .= sprintf('%04d',$thread['id']).'] '.$thread['name'] .' ';
+        //$title = '['.C4GForumHelper::getTypeText($forumtype,'THREAD') . ' #';
+		//$title .= sprintf('%04d',$thread['id']).'] '.$thread['name'] .' ';
+		$title .= $thread['name'];
         if($time){
             $title .= date($GLOBALS['TL_CONFIG']['timeFormat'], intval($thread['tstamp']));
         }
         if($thread['state'])
         {
             $state = C4GForumTicketStatus::getState($thread['state']);
-            $title .=': (<b>'.$state.'</b>)';
+            //$title .=': (<b>'.$state.'</b>)';   
         }
         return $title;
     }

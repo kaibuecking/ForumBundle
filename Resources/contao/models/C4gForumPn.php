@@ -395,7 +395,7 @@ namespace con4gis\ForumBundle\Resources\contao\models;
          */
         public function send($sUrl){
             $this->_save(false);
-            $this->notifyRecipient($sUrl);
+            // $this->notifyRecipient($sUrl);
         }
 
 
@@ -478,7 +478,8 @@ namespace con4gis\ForumBundle\Resources\contao\models;
             if ($GLOBALS ['TL_CONFIG'] ['useSMTP'] and (filter_var($GLOBALS ['TL_CONFIG'] ['smtpUser'], FILTER_VALIDATE_EMAIL))) {
                 $eMail->from = $GLOBALS ['TL_CONFIG'] ['smtpUser'];
             } else {
-                $eMail->from = $GLOBALS ['TL_CONFIG'] ['adminEmail'];
+                // $eMail->from = $GLOBALS ['TL_CONFIG'] ['adminEmail'];
+                $eMail->from = $GLOBALS ['TL_CONFIG'] ['smtpUser'];
             }
 
             $eMail->fromName = $aSender['username'];
