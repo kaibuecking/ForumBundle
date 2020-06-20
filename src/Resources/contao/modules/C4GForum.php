@@ -36,6 +36,7 @@ use Contao\System;
 
 $GLOBALS['c4gForumErrors'] = array();
 $GLOBALS['c4gForumSearchParamCache'] = array();
+$GLOBALS['first_post'] = true;
 
 /**
  * to catch warnings etc. and put them into the ajax response separately
@@ -1185,14 +1186,22 @@ class C4GForum extends \Module
             }
         }
 
-        if (!$preview) {
-            $data .= '<span class="c4g_forum_post_head_postcount_row">' . sprintf(C4GForumHelper::getTypeText($this->c4g_forum_type, 'POST_HEADER_COUNT'), 'class=c4g_forum_post_head_postcount_number', $post['post_number'], 'class=c4g_forum_post_head_postcount_count', $post['posts']) . '</span>';
+        if (!$preview && !$GLOBALS['first_post']) { 
+            $data .= '<span class="c4g_forum_post_head_postcount_row">' . sprintf(C4GForumHelper::getTypeText($this->c4g_forum_type,'POST_HEADER_COUNT'), 'class=c4g_forum_post_head_postcount_number', $post['post_number'] - 1, 'class=c4g_forum_post_head_postcount_count', $post['posts'] - 1 ) . '<br></span>';               
+        }
+        else{
+            $GLOBALS['first_post'] = false;
         }
 
         if ((!$preview) && (!$singlePost)) {
             $act = $this->getChangeActionsForPost($post);
-            foreach ($act as $key => $value) {
-                $data .= '<a href="#" data-action="' . $key . '" class="c4gForumPostHeaderChangeButton c4gGuiAction' . $linkClass . $triggerTargetClass . '">' . $value . '</a>';
+            foreach ($act as $key => $value) {                    
+                if($post['post_number'] == 1 && $value == "Löschen"){
+                    //don't show first post delete button
+                }
+                else{
+                    $data .= '<button class="btn btn-primary btn-sm mr-1 c4gForumPostHeaderChangeButton" ><a href="#" data-action="' . $key . '" style="color:white; text-decoration-line: initial" class="c4gForumPostHeaderChangeButton c4gGuiAction' . $linkClass . $triggerTargetClass . '">' . $value . '</a></button>';    
+                }                    
             }
         }
         $act = $this->getViewActionsForPost($post);
@@ -6355,7 +6364,7 @@ class C4GForum extends \Module
                 $result['cronexec'][] = $sitemapJob;
             }
         }
-//            return $result;
+        //    return $result;
         if ($this->plainhtml) {
             return $result;
         } else {

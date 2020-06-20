@@ -393,7 +393,7 @@ namespace con4gis\ForumBundle\Resources\contao\models;
          */
         public function send($sUrl){
             $this->_save(false);
-            $this->notifyRecipient($sUrl);
+            // $this->notifyRecipient($sUrl);
         }
 
 
