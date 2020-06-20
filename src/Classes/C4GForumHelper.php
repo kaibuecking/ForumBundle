@@ -354,6 +354,9 @@ class C4GForumHelper extends \System
         $aSize[1] = ($aSize[1] > 0) ? $aSize[1] : 100;
 
         $aImage = deserialize(C4gForumMember::getAvatarByMemberId($iMemberId));
+        if (!is_array($aImage) || count($aImage) === 0) {
+            return null;
+        }
         $sImage = $aImage[0];
         $sImagePath = \Contao\Image::get($sImage, $aSize[0], $aSize[1], 'center_center');
 
@@ -1585,7 +1588,22 @@ class C4GForumHelper extends \System
 
                 break;
         }
-        $select = 'SELECT a.id,a.pid AS threadid,' . $sqlAuthor . ',a.author AS authorid,a.creation,a.subject,a.text,c.name AS threadname, c.author AS threadauthor, d.name AS forumname,d.id AS forumid, a.rating, ' .
+        $select = 'SELECT \'first\', a.id,a.pid AS threadid,' . $sqlAuthor . ',a.author AS authorid,a.creation,a.subject,a.text,c.name AS threadname, c.author AS threadauthor, d.name AS forumname,d.id AS forumid, a.rating, ' .
+                         'a.post_number, c.posts, a.edit_count, ' . $sqlEditUser . ' AS edit_username, a.edit_last_time, a.linkname, a.linkurl, d.link_newwindow,' .
+                         'a.loc_geox, a.loc_geoy, a.loc_data_type, a.loc_data_content, a.locstyle, a.loc_label, a.loc_tooltip, a.loc_osm_id, a.tags, ' .
+                         'd.map_label, d.map_tooltip, d.map_popup, d.map_link ' .
+                'FROM tl_c4g_forum_post a ' .
+                'LEFT JOIN tl_member b ON b.id = a.author ' .
+                'INNER JOIN tl_c4g_forum_thread c ON c.id = a.pid ' .
+                'INNER JOIN tl_c4g_forum d ON d.id = c.pid ' .
+                'LEFT JOIN tl_member e ON e.id = a.edit_last_author '; 
+        if ($threadId <> 0) {
+            $select .= ' WHERE a.pid = ? AND a.post_number = 1 ';
+        } else {
+            $select .= ' WHERE a.pid = ? AND a.post_number = 1 ';
+        };
+        $select .= 'UNION ALL ';
+        $select .= 'SELECT \'follow\', a.id,a.pid AS threadid,' . $sqlAuthor . ',a.author AS authorid,a.creation,a.subject,a.text,c.name AS threadname, c.author AS threadauthor, d.name AS forumname,d.id AS forumid, a.rating, ' .
                          'a.post_number, c.posts, a.edit_count, ' . $sqlEditUser . ' AS edit_username, a.edit_last_time, a.linkname, a.linkurl, d.link_newwindow,' .
                          'a.loc_geox, a.loc_geoy, a.loc_data_type, a.loc_data_content, a.locstyle, a.loc_label, a.loc_tooltip, a.loc_osm_id, a.tags, ' .
                          'd.map_label, d.map_tooltip, d.map_popup, d.map_link ' .
@@ -1597,16 +1615,20 @@ class C4GForumHelper extends \System
 
         if ($threadId <> 0) {
             $posts = $this->Database->prepare(
-                $select . ' WHERE a.pid = ? ORDER BY a.id ' . $order)
-                ->execute($threadId);
+                $select . ' WHERE a.pid = ? AND a.post_number != 1 ORDER BY 1, id ' . $order)
+                ->execute($threadId,$threadId);
         } else {
             $posts = $this->Database->prepare(
-                $select . ' WHERE a.id = ? ')
-                ->execute($postId);
+                $select . ' WHERE a.id = ? AND a.post_number != 1 ORDER BY 1')
+                ->execute($postId, $postId);
         }
         $aPosts = $posts->fetchAllAssoc();
 
         foreach ($aPosts as $key => $aPost) {
+            // Ensure $aPosts[$key] is initialized as an array
+            if (!isset($aPosts[$key]) || !is_array($aPosts[$key])) {
+                $aPosts[$key] = [];
+            }
             if (empty($aPosts[$key]['username'])) {
                 $aPosts[$key]['username'] = $GLOBALS['TL_LANG']['C4G_FORUM']['DISCUSSIONS']['DELETED_USER'];
             }
@@ -1815,15 +1837,17 @@ class C4GForumHelper extends \System
     }
     public function getTicketTitle($ticketId, $forumtype, $time = null)
     {
+       	//changed for Sensique
         $thread = $this->Database->prepare('SELECT * FROM tl_c4g_forum_thread WHERE id=?')->execute($ticketId)->fetchAssoc();
-        $title = '[' . C4GForumHelper::getTypeText($forumtype, 'THREAD') . ' #';
-        $title .= sprintf('%04d', $thread['id']) . '] ' . $thread['name'];
+        // $title = '[' . C4GForumHelper::getTypeText($forumtype, 'THREAD') . ' #';
+        // $title .= sprintf('%04d', $thread['id']) . '] ' . $thread['name'];
+        $title = $thread['name'];
         if ($time) {
             $title .= ' ' . date($GLOBALS['TL_CONFIG']['timeFormat'], intval($thread['tstamp']));
         }
         if ($thread['state'] && $forumtype === 'TICKET') {
             $state = C4GForumTicketStatus::getState($thread['state']);
-            $title .= ': (<b>' . $state . '</b>)';
+            // $title .= ': (<b>' . $state . '</b>)';
         }
 
         return $title;

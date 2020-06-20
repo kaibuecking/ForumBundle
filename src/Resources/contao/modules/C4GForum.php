@@ -36,6 +36,7 @@ use Contao\System;
 
 $GLOBALS['c4gForumErrors'] = array();
 $GLOBALS['c4gForumSearchParamCache'] = array();
+$GLOBALS['first_post'] = true;
 
 /**
  * to catch warnings etc. and put them into the ajax response separately
@@ -1182,14 +1183,22 @@ class C4GForum extends \Module
             }
         }
 
-        if (!$preview) {
-            $data .= '<span class="c4g_forum_post_head_postcount_row">' . sprintf(C4GForumHelper::getTypeText($this->c4g_forum_type, 'POST_HEADER_COUNT'), 'class=c4g_forum_post_head_postcount_number', $post['post_number'], 'class=c4g_forum_post_head_postcount_count', $post['posts']) . '</span>';
+        if (!$preview && !$GLOBALS['first_post']) { 
+            $data .= '<span class="c4g_forum_post_head_postcount_row">' . sprintf(C4GForumHelper::getTypeText($this->c4g_forum_type,'POST_HEADER_COUNT'), 'class=c4g_forum_post_head_postcount_number', $post['post_number'] - 1, 'class=c4g_forum_post_head_postcount_count', $post['posts'] - 1 ) . '<br></span>';               
+        }
+        else{
+            $GLOBALS['first_post'] = false;
         }
 
         if ((!$preview) && (!$singlePost)) {
             $act = $this->getChangeActionsForPost($post);
-            foreach ($act as $key => $value) {
-                $data .= '<a href="#" data-action="' . $key . '" class="c4gForumPostHeaderChangeButton c4gGuiAction' . $linkClass . $triggerTargetClass . '">' . $value . '</a>';
+            foreach ($act as $key => $value) {                    
+                if($post['post_number'] == 1 && $value == "Löschen"){
+                    //don't show first post delete button
+                }
+                else{
+                    $data .= '<button class="btn btn-primary btn-sm mr-1 c4gForumPostHeaderChangeButton" ><a href="#" data-action="' . $key . '" style="color:white; text-decoration-line: initial" class="c4gForumPostHeaderChangeButton c4gGuiAction' . $linkClass . $triggerTargetClass . '">' . $value . '</a></button>';    
+                }                    
             }
         }
         $act = $this->getViewActionsForPost($post);
@@ -1317,7 +1326,7 @@ class C4GForum extends \Module
         $oUserDataTemplate->sForumType = $this->c4g_forum_type;
 
         // Get different member properties and hand them over to the user data template.
-        $oUserDataTemplate->iUserId = $oMember->id;
+        $oUserDataTemplate->iUserId = $oMember != null ? $oMember->id : null;
 
         $oUserDataTemplate->c4g_forum_show_pn_button = ($this->User->id && ($this->User->id != $iAuthorId) && $this->c4g_forum_show_pn_button == '1' && !$preview);
         $oUserDataTemplate->c4g_forum_module = $this->id;
@@ -1377,10 +1386,15 @@ class C4GForum extends \Module
             $oUserDataTemplate->sAvatarImage = $sImage;
         }
 
+        $aMemberLinks = [];
+
         // Get all fields from the tl_member DCA that are marked with the memberLink eval key.
         foreach ($GLOBALS['TL_DCA']['tl_member']['fields'] as $sKey => $aField) {
-            if ($aField['eval']['memberLink']) {
-                if ($oMember->$sKey !== '') {
+            if (isset($aField['eval'])
+            && is_array($aField['eval'])
+            && isset($aField['eval']['memberLink'])
+            && $aField['eval']['memberLink']) {
+                if ($oMember != null && $oMember->$sKey != null && $oMember->$sKey !== '') {
                     if (C4GUtils::startsWith($oMember->$sKey, 'https://') || C4GUtils::startsWith($oMember->$sKey, 'http://')) {
                         $aMemberLinks[$sKey] = $oMember->$sKey;
                     } else {
@@ -1412,7 +1426,7 @@ class C4GForum extends \Module
         }
 
         $sUserData = $oUserDataTemplate->parse();
-        $sSignature = $oMember->memberSignature;
+        $sSignature = $oMember != null ? $oMember->memberSignature : null;
         $sSignatureArea = '';
         if (!empty($sSignature)) {
             $sSignatureArea = '<div class="signature_wrapper"><hr>' . $sSignature . '</div>';
@@ -5787,7 +5801,8 @@ class C4GForum extends \Module
                 $return = $this->getForumintro($values[1]);
                 break;
             case $this->c4g_forum_param_forum:
-                $return = $this->getForumInTable($values[1], $values[2]);
+                $forumTree = isset($values[2]) ? $values[2] : false;
+                $return = $this->getForumInTable($values[1], $forumTree);
                 break;
             case 'readthread':
                 $return = $this->getThreadAsHtml($values[1]);
@@ -6298,7 +6313,7 @@ class C4GForum extends \Module
             }
 
             // History navigation
-            if ($_GET['historyreq']) {
+            if (isset($_GET['historyreq']) && $_GET['historyreq']) {
                 $actions = explode(';', $_GET['historyreq']);
                 $result = array();
                 foreach ($actions as $action) {
@@ -6355,7 +6370,7 @@ class C4GForum extends \Module
                 $result['cronexec'][] = $sitemapJob;
             }
         }
-//            return $result;
+        //    return $result;
         if ($this->plainhtml) {
             return $result;
         } else {

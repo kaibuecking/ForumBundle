@@ -36,7 +36,7 @@ class C4gForumMember extends \Model
         $t = static::$sTable;
         $oDatabase = \Database::getInstance();
         $aMemberImage = $oDatabase->prepare("SELECT memberImage FROM $t WHERE id=?")->execute($iMemberId)->fetchAssoc();
-        $sMemberImagePath = $aMemberImage['memberImage'];
+        $sMemberImagePath = isset($aMemberImage['memberImage']) ? $aMemberImage['memberImage'] : null;
 
         return $sMemberImagePath;
     }

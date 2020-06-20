@@ -24,6 +24,6 @@ $GLOBALS['TL_LANG']['tl_c4g_forum_pn']['action']           = "action";
 $GLOBALS['TL_LANG']['tl_c4g_forum_pn']['dt_created']       = "date";
 $GLOBALS['TL_LANG']['tl_c4g_forum_pn']['inbox']            = "inbox";
 $GLOBALS['TL_LANG']['tl_c4g_forum_pn']['compose']          = "new message";
-$GLOBALS['TL_LANG']['tl_c4g_forum_pn']['profile_compose']  = "<i class='fa fa-envelope-o'></i> send message";
+$GLOBALS['TL_LANG']['tl_c4g_forum_pn']['profile_compose']  = "<i class='far fa-envelope'></i>&nbsp;Nachricht senden";
 $GLOBALS['TL_LANG']['tl_c4g_forum_pn']['profile_compose_title']  = "message to ";
 $GLOBALS['TL_LANG']['tl_c4g_forum_pn']['send_error']       = "An error has occurred. Please check mandatory fields.";
