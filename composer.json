@@ -23,8 +23,7 @@
   },
   "require": {
     "contao/core-bundle": "^4.4",
-    // "con4gis/core": "^2.3",
-    "kaibuecking/forum": "dev-customfeatures",
+    "kaibuecking/core": "dev-customfeatures",
     "terminal42/notification_center": "^1.4"
   },
   "conflict": {
