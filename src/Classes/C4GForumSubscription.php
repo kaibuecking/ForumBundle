@@ -202,14 +202,18 @@ class C4GForumSubscription
         $subscriptionModels = C4GThreadSubscriptionModel::findBy('pid', $threadId);
         $subs = [];
         foreach ($subscriptionModels as $model) {
-            $subs[$model->member] = new Subscription(MemberModel::findByPk($model->member), [
+            $member = MemberModel::findByPk($model->member);
+            if ($member != null) {
+                $types = [
                 'newThread',
                 'movedThread',
                 'deletedThread',
                 'newPost',
                 'editedPost',
                 'deletedPost',
-            ]);
+                ];
+                $subs[$model->member] = new Subscription($member, $types);
+            }
         }
 
         return $subs;
