@@ -342,6 +342,9 @@ class C4GForumHelper extends \System
         $aSize[1] = ($aSize[1] > 0) ? $aSize[1] : 100;
 
         $aImage = deserialize(C4gForumMember::getAvatarByMemberId($iMemberId));
+        if (!is_array($aImage) || count($aImage) === 0) {
+            return null;
+        }
         $sImage = $aImage[0];
         $sImagePath = \Contao\Image::get($sImage, $aSize[0], $aSize[1], 'center_center');
 
