@@ -1588,7 +1588,7 @@ class C4GForumHelper extends \System
         if ($threadId <> 0) {
             $select .= ' WHERE a.pid = ? AND a.post_number = 1 ';
         } else {
-            $select .= ' WHERE a.id = ? AND a.post_number = 1 ';
+            $select .= ' WHERE a.pid = ? AND a.post_number = 1 ';
         };
         $select .= 'UNION ALL ';
         $select .= 'SELECT \'follow\', a.id,a.pid AS threadid,' . $sqlAuthor . ',a.author AS authorid,a.creation,a.subject,a.text,c.name AS threadname, c.author AS threadauthor, d.name AS forumname,d.id AS forumid, a.rating, ' .
@@ -1603,7 +1603,7 @@ class C4GForumHelper extends \System
 
         if ($threadId <> 0) {
             $posts = $this->Database->prepare(
-                $select . ' WHERE a.pid = ? AND a.post_number != 1 ORDER BY 1, a.id ' . $order)
+                $select . ' WHERE a.pid = ? AND a.post_number != 1 ORDER BY 1, id ' . $order)
                 ->execute($threadId,$threadId);
         } else {
             $posts = $this->Database->prepare(
