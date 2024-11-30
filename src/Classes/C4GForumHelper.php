@@ -1584,9 +1584,13 @@ class C4GForumHelper extends \System
                 'LEFT JOIN tl_member b ON b.id = a.author ' .
                 'INNER JOIN tl_c4g_forum_thread c ON c.id = a.pid ' .
                 'INNER JOIN tl_c4g_forum d ON d.id = c.pid ' .
-                'LEFT JOIN tl_member e ON e.id = a.edit_last_author ' .
-                'WHERE WHERE a.pid = ? AND a.post_number = 1 ' .
-                'UNION ALL ';
+                'LEFT JOIN tl_member e ON e.id = a.edit_last_author '; 
+        if ($threadId <> 0) {
+            $select .= ' WHERE a.pid = ? AND a.post_number = 1 ';
+        } else {
+            $select .= ' WHERE a.id = ? AND a.post_number = 1 ';
+        };
+        $select .= 'UNION ALL ';
         $select .= 'SELECT \'follow\', a.id,a.pid AS threadid,' . $sqlAuthor . ',a.author AS authorid,a.creation,a.subject,a.text,c.name AS threadname, c.author AS threadauthor, d.name AS forumname,d.id AS forumid, a.rating, ' .
                          'a.post_number, c.posts, a.edit_count, ' . $sqlEditUser . ' AS edit_username, a.edit_last_time, a.linkname, a.linkurl, d.link_newwindow,' .
                          'a.loc_geox, a.loc_geoy, a.loc_data_type, a.loc_data_content, a.locstyle, a.loc_label, a.loc_tooltip, a.loc_osm_id, a.tags, ' .
