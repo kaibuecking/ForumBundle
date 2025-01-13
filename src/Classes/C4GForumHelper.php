@@ -1613,6 +1613,10 @@ class C4GForumHelper extends \System
         $aPosts = $posts->fetchAllAssoc();
 
         foreach ($aPosts as $key => $aPost) {
+            // Ensure $aPosts[$key] is initialized as an array
+            if (!isset($aPosts[$key]) || !is_array($aPosts[$key])) {
+                $aPosts[$key] = [];
+            }
             if (empty($aPosts[$key]['username'])) {
                 $aPosts[$key]['username'] = $GLOBALS['TL_LANG']['C4G_FORUM']['DISCUSSIONS']['DELETED_USER'];
             }

@@ -1327,7 +1327,7 @@ class C4GForum extends \Module
         $oUserDataTemplate->sForumType = $this->c4g_forum_type;
 
         // Get different member properties and hand them over to the user data template.
-        $oUserDataTemplate->iUserId = $oMember->id;
+        $oUserDataTemplate->iUserId = $oMember != null ? $oMember->id : null;
 
         $oUserDataTemplate->c4g_forum_show_pn_button = ($this->User->id && ($this->User->id != $iAuthorId) && $this->c4g_forum_show_pn_button == '1' && !$preview);
         $oUserDataTemplate->c4g_forum_module = $this->id;
@@ -1335,25 +1335,29 @@ class C4GForum extends \Module
 
         $sJsLang = C4GForumPNCenter::getClientLangVars();
         $oUserDataTemplate->c4g_pn_js = $sJsLang;
-
-        switch ($this->c4g_forum_show_realname) {
-            case 'UU';
-                $oUserDataTemplate->sUserName = $oMember->username;
-                break;
-            case 'FF';
-                $oUserDataTemplate->sUserName = $oMember->firstname;
-                break;
-            case 'LL';
-                $oUserDataTemplate->sUserName = $oMember->lastname;
-                break;
-            case 'FL';
-                $oUserDataTemplate->sUserName = $oMember->firstname . ' ' . $oMember->lastname;
-                break;
-            case 'LF';
-                $oUserDataTemplate->sUserName = $oMember->lastname . ', ' . $oMember->firstname;
-                break;
-            default;
-                break;
+        if($oMember == null){
+            $oUserDataTemplate->sUserName = "";
+        }
+        else{        
+            switch ($this->c4g_forum_show_realname) {
+                case 'UU';
+                    $oUserDataTemplate->sUserName = $oMember->username;
+                    break;
+                case 'FF';
+                    $oUserDataTemplate->sUserName = $oMember->firstname;
+                    break;
+                case 'LL';
+                    $oUserDataTemplate->sUserName = $oMember->lastname;
+                    break;
+                case 'FL';
+                    $oUserDataTemplate->sUserName = $oMember->firstname . ' ' . $oMember->lastname;
+                    break;
+                case 'LF';
+                    $oUserDataTemplate->sUserName = $oMember->lastname . ', ' . $oMember->firstname;
+                    break;
+                default;
+                    break;
+            }
         }
         if ($this->c4g_forum_user_profile_page) {
             $page = PageModel::findByPk($this->c4g_forum_user_profile_page);
@@ -1390,10 +1394,15 @@ class C4GForum extends \Module
             $oUserDataTemplate->sAvatarImage = $sImage;
         }
 
+        $aMemberLinks = [];
+
         // Get all fields from the tl_member DCA that are marked with the memberLink eval key.
         foreach ($GLOBALS['TL_DCA']['tl_member']['fields'] as $sKey => $aField) {
-            if ($aField['eval']['memberLink']) {
-                if ($oMember->$sKey !== '') {
+            if (isset($aField['eval']) 
+            && is_array($aField['eval']) 
+            && isset($aField['eval']['memberLink'])
+            && $aField['eval']['memberLink']) {
+                if ($oMember != null && $oMember->$sKey != null && $oMember->$sKey !== '') {
                     if (C4GUtils::startsWith($oMember->$sKey, 'https://') || C4GUtils::startsWith($oMember->$sKey, 'http://')) {
                         $aMemberLinks[$sKey] = $oMember->$sKey;
                     } else {
@@ -1425,7 +1434,7 @@ class C4GForum extends \Module
         }
 
         $sUserData = $oUserDataTemplate->parse();
-        $sSignature = $oMember->memberSignature;
+        $sSignature = $oMember != null ? $oMember->memberSignature : null;
         $sSignatureArea = '';
         if (!empty($sSignature)) {
             $sSignatureArea = '<div class="signature_wrapper"><hr>' . $sSignature . '</div>';
@@ -5800,7 +5809,8 @@ class C4GForum extends \Module
                 $return = $this->getForumintro($values[1]);
                 break;
             case $this->c4g_forum_param_forum:
-                $return = $this->getForumInTable($values[1], $values[2]);
+                $forumTree = isset($values[2]) ? $values[2] : false;
+                $return = $this->getForumInTable($values[1], $forumTree);
                 break;
             case 'readthread':
                 $return = $this->getThreadAsHtml($values[1]);
@@ -6307,7 +6317,7 @@ class C4GForum extends \Module
             }
 
             // History navigation
-            if ($_GET['historyreq']) {
+            if (isset($_GET['historyreq']) && $_GET['historyreq']) {
                 $actions = explode(';', $_GET['historyreq']);
                 $result = array();
                 foreach ($actions as $action) {
