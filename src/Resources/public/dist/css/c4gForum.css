@@ -34,12 +34,11 @@
   box-sizing: border-box;
   margin-right: 10px;
   margin-bottom: 10px;
-	width: 214px;
-	height: 214px;
+  width: 170px;
+  height: 170px;
   float: left;
   cursor: pointer;
-  position: relative;
-  font-size: 1.2rem !important;
+  position: relative
 }
 .c4gForumBoxWithoutImage.c4gForumBoxNoJqui {
   border: 1px solid #000
@@ -58,7 +57,7 @@
 }
 .c4gForumBoxSubtext {
   position: absolute;
-	margin-top: 4.5rem;
+  margin-top: 50px;
   margin-left: -50%;
   left: 50%;
   width: 100%;
@@ -76,7 +75,7 @@
 .c4gForumBoxLastPost {
   float: bottom;
   text-align: center;
-	font-size: 62%;
+  font-size: 70%;
   position: absolute;
   bottom: 0;
   margin: 10px;
@@ -116,33 +115,22 @@
 .c4gForumNewThread textarea {
   width: 100%
 }
-.c4gForumPost{
-	border: 1px solid rgba(0,0,0,.125);
-    border-radius: .25rem;
-}
-
 .c4gForumPostBody {
-	padding-left: 2%;
-	padding-right: 2%;
+  padding-bottom: 10px;
+  padding-left: 10px;
+  padding-right: 10px
 }
 .c4gForumPostBody:after {
   clear: both;
   content: " ";
   display: table
 }
-
+.c4gForumPostHeader,
 .c4gForumPostText,
 .c4g_forum_post_user_data {
   padding-top: 10px;
   padding-bottom: 10px
 }
-
-.c4gForumPostHeader{
-	padding: 2%;
-	border-bottom: 1px solid rgba(0,0,0,.125);
-	background-color: #f3f3f3;
-}
-
 .c4gForumPostHeader.ui-widget,
 .c4gForumPostText.ui-widget {
   padding: 10px
@@ -159,7 +147,7 @@
   width: 78%
 }
 .c4gForumPostText img {
-  /* width: auto */
+  width: auto
 }
 .c4g_forum_post_user_data {
   float: left;
@@ -174,8 +162,7 @@
 }
 .c4g_forum_post_user_data .user_image {
   height: auto;
-  max-width: 100%;
-  border-radius: 50%;  /*sensqiue*/
+  max-width: 100%
 }
 .c4g_forum_post_user_data .online_status {
   border-radius: 50%;
@@ -235,7 +222,7 @@
   padding-right: 10px
 }
 .c4gGuiDialogContent {
-  /* margin-top: 10px; */
+  margin-top: 10px;
   margin-bottom: 10px
 }
 .c4gForumPostMap {
@@ -258,7 +245,7 @@
 }
 .c4g_pagination a {
   min-width: 16px;
-  height: 30px;
+  height: 16px;
   padding: 5px;
   text-decoration: none;
   margin-right: 2px
@@ -438,16 +425,4 @@ blockquote:before {
 }
 .c4gForumNewThreadContent trix-editor {
   min-height: 150px
-}
-
-/* Sensique  Extension */
-.c4g_forum_post_head_edit_row{
-	border: solid 1px #dfdfdf;
-	border-bottom-left-radius: 0.25rem;
-	border-bottom-right-radius: 0.25rem;
-    top: -0.25rem;
-    position: relative;
-	font-style: italic;
-	background-color: #f3f3f3;
-
 }
